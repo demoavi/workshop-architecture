@@ -42,14 +42,24 @@ alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "
 tenant_count=$(echo $response_body | jq -c -r '.count')
 tenant_results=$(echo $response_body | jq -c -r '.results')
 #
+alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/user"
+user_count=$(echo $response_body | jq -c -r '.count')
+user_results=$(echo $response_body | jq -c -r '.results')
+#
 # create // tenants already exist 
 if [[ ${tenant_count} != 1 && ${create} == "true" ]] ; then
-  echo "+++ script will exist because tenants already exist"
+  echo "+++ script will exist because tenants already exist, please clean-up"
   exit
 fi
 #
-# create // tenants don't exist
-if [[ ${tenant_count} == 1 && ${create} == "true" ]] ; then
+# create // users already exist 
+if [[ ${user_count} != 1 && ${create} == "true" ]] ; then
+  echo "+++ script will exist because users already exist, please clean-up"
+  exit
+fi
+#
+# create // tenants and users don't exist
+if [[ ${tenant_count} == 1 && ${user_count} != 1 && ${create} == "true" ]] ; then
   echo "+++ tenants creation"
   count=1
   jq -c -r .[] $avi_attendees_file | while read attendee
@@ -64,9 +74,28 @@ if [[ ${tenant_count} == 1 && ${create} == "true" ]] ; then
         "tenant_access_to_provider_se": '$(jq -c -r '.tenant.config_settings.tenant_access_to_provider_se' ${avi_settings_file})'
       }
     }'
-    echo ${json_data}
-    echo ${json_data} | jq .
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/tenant"
+    echo "+++ users creation"
+    json_data='
+    {
+      "access": [
+        {
+          "role_ref": "api/tenant/admin/role/role-4cc32293-2006-4468-ac1c-16ca9ccb3f03",
+          "tenant_ref": "api/tenant/tenant-066df56f-9835-4cdd-86b4-4cbe5a394429",
+          "all_tenants": false
+        }
+      ],
+      "password": "",
+      "username": "nicolas.bayle@broadcom.com",
+      "name": "nicolas.bayle@broadcom.com",
+      "full_name": "nicolas.bayle@broadcom.com",
+      "email": "nicolas.bayle@broadcom.com",
+      "is_superuser": false,
+      "is_active": true,
+      "default_tenant_ref": "api/tenant/tenant-066df56f-9835-4cdd-86b4-4cbe5a394429",
+      "user_profile_ref": "api/useraccountprofile/useraccountprofile-edb044b0-4b43-4bef-9231-7e391fecb102",
+    }'
+    #alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/user"
     ((count++))
   done
 fi
@@ -85,3 +114,4 @@ if [[ ${tenant_count} != 1 && ${create} == "false" ]] ; then
     fi
   done
 fi
+#
