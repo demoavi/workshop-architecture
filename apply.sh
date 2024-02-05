@@ -4,6 +4,7 @@ source /home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architec
 #
 yq -c -r . /home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/vars.yml | tee /home/ubuntu/vars.json
 jsonFile="/home/ubuntu/vars.json"
+avi_settings_file="/home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/settings.json"
 #
 if [[ $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "emea" && \
       $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "us" && \
@@ -39,16 +40,20 @@ csrftoken=$(cat ${avi_cookie_file} | grep csrftoken | awk '{print $7}')
 #
 alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/tenant"
 tenant_count=$(echo $response_body | jq -c -r '.count')
+#
 # create // tenants already exist 
 if [[ ${tenant_count} != 1 && ${create} == "true" ]] ; then
   echo "+++ script will exist because tenants already exist"
   exit
 fi
+#
 # create // tenants don't exist
 if [[ ${tenant_count} == 1 && ${create} == "true" ]] ; then
   echo "+++ tenants creation"
+  count=1
   jq -c -r .[] $avi_attendees_file | while read attendee
   do
-    echo "++++ creation of tenant: ${attendee}"
+    echo "++++ creation of tenant: $(jq -c -r '.tenant.basename' ${avi_settings_file})${count}"
+    ((count++))
   done
 fi
