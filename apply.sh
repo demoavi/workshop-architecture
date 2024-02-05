@@ -77,7 +77,7 @@ if [[ ${tenant_count} != 1 && ${create} == "false" ]] ; then
   echo ${tenant_results} | jq -c -r '.[]' | while read tenant
   do
     tenant_name=$(echo ${tenant} | jq -c -r '.name')
-    tenant_url=$(echo ${tenant} | jq -c -r '.name')
+    tenant_url=$(echo ${tenant} | jq -c -r '.url')
     echo ${tenant_url}
     if [[ ${tenant_name} != "admin" ]] ; then
       echo "++++ deletion of tenant: ${tenant_name}, url ${tenant_url}"
