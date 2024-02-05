@@ -60,8 +60,6 @@ if [[ ${user_count} != 1 && ${create} == "true" ]] ; then
 fi
 #
 # create // tenants and users don't exist
-echo ${tenant_count}
-echo ${user_count}
 if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; then
   echo "+++ tenants creation"
   count=1
@@ -99,8 +97,6 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
       "default_tenant_ref": "/api/tenant/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
       "user_profile_ref": "/api/useraccountprofile/?name='$(jq -c -r '.user.user_profile_ref' ${avi_settings_file})'"
     }'
-    echo ${json_data}
-    echo ${json_data} | jq -c -r '.'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/user"
     ((count++))
   done
