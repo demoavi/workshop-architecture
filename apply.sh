@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-source bash/avi_api.sh
+source /home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/bash/avi/avi_api.sh
 #
-yq -c -r vars.yml | tee vars.json
-jsonFile="vars.json"
+yq -c -r /home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/vars.yml | tee /home/ubuntu/vars.json
+jsonFile="/home/ubuntu/vars.json"
 #
 if [[ $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "emea" && \
       $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "us" && \
