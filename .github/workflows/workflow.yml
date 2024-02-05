@@ -22,4 +22,4 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Execute apply.sh
-      run: /bin/bash /home/ubuntu/actions-runner-eu/_work/workshop-architecture/workshop-architecture/apply.sh
+      run: /bin/bash /home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/apply.sh
