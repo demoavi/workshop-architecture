@@ -22,6 +22,7 @@ zone=$(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:])
 create=$(jq -c -r '.create' $jsonFile | tr '[:upper:]' [:lower:])
 #
 avi_auth_file="/home/ubuntu/.avicreds-${zone}.json"
+avi_attendees_file="/home/ubuntu/.attendees-${zone}.json"
 avi_cookie_file="/home/ubuntu/avi_cookie_${zone}.txt"
 rm -f ${avi_cookie_file}
 #
@@ -38,7 +39,16 @@ csrftoken=$(cat ${avi_cookie_file} | grep csrftoken | awk '{print $7}')
 #
 alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/tenant"
 tenant_count=$(echo $response_body | jq -c -r '.count')
+# create // tenants already exist 
 if [[ ${tenant_count} != 1 && ${create} == "true" ]] ; then
   echo "+++ script will exist because tenants already exist"
   exit
+fi
+# create // tenants don't exist
+if [[ ${tenant_count} == 1 && ${create} == "true" ]] ; then
+  echo "+++ tenants creation"
+  jq -c -r .[] $avi_attendees_file | while read attendee
+  do
+    echo "++++ creation of tenant: ${attendee}"
+  done
 fi
