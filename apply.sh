@@ -22,7 +22,7 @@ zone=$(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:])
 create=$(jq -c -r '.create' $jsonFile | tr '[:upper:]' [:lower:])
 #
 avi_auth_file="/home/ubuntu/.avicreds-${zone}.json"
-avi_attendees_file="/home/ubuntu/.attendees-${zone}.json"
+avi_attendees_file="/home/ubuntu/attendees-${zone}.json"
 avi_cookie_file="/home/ubuntu/avi_cookie_${zone}.txt"
 rm -f ${avi_cookie_file}
 #
