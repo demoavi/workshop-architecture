@@ -40,6 +40,7 @@ csrftoken=$(cat ${avi_cookie_file} | grep csrftoken | awk '{print $7}')
 #
 alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/tenant"
 tenant_count=$(echo $response_body | jq -c -r '.count')
+tenant_results=$(echo $response_body | jq -c -r '.results')
 #
 # create // tenants already exist 
 if [[ ${tenant_count} != 1 && ${create} == "true" ]] ; then
@@ -67,5 +68,19 @@ if [[ ${tenant_count} == 1 && ${create} == "true" ]] ; then
     echo ${json_data} | jq .
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/tenant"
     ((count++))
+  done
+fi
+#
+# destroy // delete all the tenants except admin tenant
+if [[ ${tenant_count} != 1 && ${create} == "false" ]] ; then
+  echo "+++ tenants deletion"
+  echo ${tenant_results} | jq -c -r '.[]' | while read tenant
+  do
+    tenant_name=$(echo ${tenant} | jq -c -r '.name')
+    tenant_url=$(echo ${tenant} | jq -c -r '.name')
+    if [[ ${tenant_name} != "admin" ]] then
+      echo "++++ deletion of tenant: ${tenant_name}, url ${tenant_url}"
+      alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${tenant_url} | grep / | cut -d/ -f4-)"
+    fi
   done
 fi
