@@ -54,6 +54,16 @@ if [[ ${tenant_count} == 1 && ${create} == "true" ]] ; then
   jq -c -r .[] $avi_attendees_file | while read attendee
   do
     echo "++++ creation of tenant: $(jq -c -r '.tenant.basename' ${avi_settings_file})${count}"
+    json_data='
+    {
+      "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
+      "config_settings": {
+        "tenant_vrf": '$(jq -c -r '.tenant.config_settings.tenant_vrf' ${avi_settings_file})',
+        "se_in_provider_context": '$(jq -c -r '.tenant.config_settings.se_in_provider_context' ${avi_settings_file}),
+        "tenant_access_to_provider_se": '$(jq -c -r '.tenant.config_settings.tenant_access_to_provider_se' ${avi_settings_file})
+      }
+    }'
+    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/tenant"
     ((count++))
   done
 fi
