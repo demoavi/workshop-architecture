@@ -106,16 +106,15 @@ fi
 if [[ ${create} == "false" ]] ; then
   echo "+++ users deletion"
   echo ${user_results} | jq -c -r '.' | tee /home/ubuntu/user.json
-  echo ${user_results} | jq -c -r '.[]' | while read user
+  IFS=$'\n'
+  for user in $(echo ${user_results} | jq -c -r '.[]')
   do
-    echo ${user} | jq -c -r .username
-    exit
     user_name=$(echo ${user} | jq -c -r '.username')
     user_url=$(echo ${user} | jq -c -r '.url')
     if [[ ${user_name} != "admin" ]] ; then
       echo "++++ deletion of user: ${user_name}, url ${user_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${user_url} | grep / | cut -d/ -f4-)"
-    fi
+    fi    
   done
   #
   echo "+++ tenants deletion"
