@@ -46,6 +46,8 @@ tenant_results=$(echo $response_body | jq -c -r '.results')
 alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/user"
 user_count=$(echo $response_body | jq -c -r '.count')
 user_results=$(echo $response_body | jq -c -r '.results')
+echo ${user_results} | jq -c -r '.'
+exit
 #
 # create // tenants already exist 
 if [[ ${tenant_count} != 1 && ${create} == "true" ]] ; then
