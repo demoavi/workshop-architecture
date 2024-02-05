@@ -84,8 +84,8 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
     {
       "access": [
         {
-          "role_ref": "api/role/?name='$(jq -c -r '.user.role_ref' ${avi_settings_file})'",
-          "tenant_ref": "api/tenant/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
+          "role_ref": "/api/role/?name='$(jq -c -r '.user.role_ref' ${avi_settings_file})'",
+          "tenant_ref": "/api/tenant/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
           "all_tenants": false
         }
       ],
@@ -96,8 +96,8 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
       "email": "'${attendee}'",
       "is_superuser": false,
       "is_active": true,
-      "default_tenant_ref": "api/tenant/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
-      "user_profile_ref": "api/useraccountprofile/?name='$(jq -c -r '.user.user_profile_ref' ${avi_settings_file})'"
+      "default_tenant_ref": "/api/tenant/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
+      "user_profile_ref": "/api/useraccountprofile/?name='$(jq -c -r '.user.user_profile_ref' ${avi_settings_file})'"
     }'
     echo ${json_data}
     echo ${json_data} | jq -c -r '.'
