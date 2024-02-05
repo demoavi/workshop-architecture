@@ -25,6 +25,7 @@ create=$(jq -c -r '.create' $jsonFile | tr '[:upper:]' [:lower:])
 avi_auth_file="/home/ubuntu/.avicreds-${zone}.json"
 avi_attendees_file="/home/ubuntu/attendees-${zone}.json"
 avi_cookie_file="/home/ubuntu/avi_cookie_${zone}.txt"
+avi_attendee_password=$(jq -c -r '.default_attendee_password' /home/ubuntu/.avi_attendee_password.json)
 rm -f ${avi_cookie_file}
 #
 avi_username=$(jq -c -r .avi_credentials.username $avi_auth_file)
@@ -75,27 +76,28 @@ if [[ ${tenant_count} == 1 && ${user_count} != 1 && ${create} == "true" ]] ; the
       }
     }'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/tenant"
+    tenant_ref=$(echo $response_body | jq -c -r '.url')
     echo "+++ users creation"
     json_data='
     {
       "access": [
         {
-          "role_ref": "api/tenant/admin/role/role-4cc32293-2006-4468-ac1c-16ca9ccb3f03",
-          "tenant_ref": "api/tenant/tenant-066df56f-9835-4cdd-86b4-4cbe5a394429",
+          "role_ref": "api/role?name='$(jq -c -r '.user.role_ref' ${avi_settings_file})'",
+          "tenant_ref": "api/tenant?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
           "all_tenants": false
         }
       ],
-      "password": "",
-      "username": "nicolas.bayle@broadcom.com",
-      "name": "nicolas.bayle@broadcom.com",
-      "full_name": "nicolas.bayle@broadcom.com",
-      "email": "nicolas.bayle@broadcom.com",
+      "password": "'${avi_attendee_password}'",
+      "username": "'${attendee}'",
+      "name": "'${attendee}'",
+      "full_name": "'${attendee}'",
+      "email": "'${attendee}'",
       "is_superuser": false,
       "is_active": true,
-      "default_tenant_ref": "api/tenant/tenant-066df56f-9835-4cdd-86b4-4cbe5a394429",
-      "user_profile_ref": "api/useraccountprofile/useraccountprofile-edb044b0-4b43-4bef-9231-7e391fecb102",
+      "default_tenant_ref": "api/tenant?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
+      "user_profile_ref": "api/useraccountprofile?name='$(jq -c -r '.user.user_profile_ref' ${avi_settings_file})'"
     }'
-    #alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/user"
+    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/user"
     ((count++))
   done
 fi
