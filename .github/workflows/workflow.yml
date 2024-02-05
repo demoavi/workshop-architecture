@@ -1,0 +1,25 @@
+name: 'architecture'
+
+on: [push]
+
+permissions:
+  contents: read
+
+jobs:
+  avi-architecture:
+    name: 'avi-automation'
+    runs-on: self-hosted
+    environment: production
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Execute apply.sh
+      run: /bin/bash /home/ubuntu/actions-runner-eu/_work/workshop-architecture/workshop-architecture/apply.sh
