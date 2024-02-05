@@ -8,11 +8,19 @@ jsonFile="/home/ubuntu/vars.json"
 if [[ $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "emea" && \
       $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "us" && \
       $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "apj" ]] ; then
-  echo "   +++ .zone should equal to one of the following: 'emea, us, apj'"
+  echo "+++ .zone should equal to one of the following: 'emea, us, apj'"
+  exit 255
+fi
+#
+if [[ $(jq -c -r '.create' $jsonFile | tr '[:upper:]' [:lower:]) != "true" && \
+      $(jq -c -r '.create' $jsonFile | tr '[:upper:]' [:lower:]) != "false" ]] ; then
+  echo "+++ .create should equal to one of the following: 'true, false'"
   exit 255
 fi
 #
 zone=$(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:])
+create=$(jq -c -r '.create' $jsonFile | tr '[:upper:]' [:lower:])
+#
 avi_auth_file="/home/ubuntu/.avicreds-${zone}.json"
 avi_cookie_file="/home/ubuntu/avi_cookie_${zone}.txt"
 rm -f ${avi_cookie_file}
@@ -30,5 +38,7 @@ csrftoken=$(cat ${avi_cookie_file} | grep csrftoken | awk '{print $7}')
 #
 alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/tenant"
 tenant_count=$(echo $response_body | jq -c -r '.count')
-echo $tenant_count
-
+if [[ ${tenant_count} != 1 && ${create} == "true" ]] ; then
+  echo "+++ script will exist because tenants already exist"
+  exit
+fi
