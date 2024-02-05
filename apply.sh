@@ -62,7 +62,7 @@ fi
 # create // tenants and users don't exist
 echo ${tenant_count}
 echo ${user_count}
-if [[ ${tenant_count} == 1 && ${user_count} != 1 && ${create} == "true" ]] ; then
+if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; then
   echo "+++ tenants creation"
   count=1
   jq -c -r .[] $avi_attendees_file | while read attendee
