@@ -105,7 +105,7 @@ fi
 # destroy // delete all the users (except admin user) and the tenants (except admin tenant)
 if [[ ${create} == "false" ]] ; then
   echo "+++ users deletion"
-  echo ${user_results}
+  echo ${user_results} | jq -c -r '.' | tee /home/ubuntu/user.json
   echo ${user_results} | jq -c -r '.[]' | while read user
   do
     echo ${user} | jq -c -r .username
