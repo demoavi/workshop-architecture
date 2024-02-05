@@ -103,8 +103,9 @@ if [[ ${tenant_count} == 1 && ${user_count} != 1 && ${create} == "true" ]] ; the
 fi
 #
 # destroy // delete all the users (except admin user) and the tenants (except admin tenant)
-if [[ {tenant_count} != 1 && {user_count} != 1 && ${create} == "false" ]] ; then
+if [[ ${create} == "false" ]] ; then
   echo "+++ users deletion"
+  echo ${user_results}
   echo ${user_results} | jq -c -r '.[]' | while read user
   do
     user_name=$(echo ${user} | jq -c -r '.name')
