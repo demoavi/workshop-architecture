@@ -102,14 +102,24 @@ if [[ ${tenant_count} == 1 && ${user_count} != 1 && ${create} == "true" ]] ; the
   done
 fi
 #
-# destroy // delete all the tenants except admin tenant
-if [[ ${tenant_count} != 1 && ${create} == "false" ]] ; then
+# destroy // delete all the users (except admin user) and the tenants (except admin tenant)
+if [[ {tenant_count} !=$ 1 && {user_count} !=$ 1 && ${create} == "false" ]] ; then
+  echo "+++ users deletion"
+  echo ${user_results} | jq -c -r '.[]' | while read user
+  do
+    user_name=$(echo ${user} | jq -c -r '.name')
+    user_url=$(echo ${user} | jq -c -r '.url')
+    if [[ ${user_name} != "admin" ]] ; then
+      echo "++++ deletion of user: ${user_name}, url ${user_url}"
+      alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${user_url} | grep / | cut -d/ -f4-)"
+    fi
+  done
+  #
   echo "+++ tenants deletion"
   echo ${tenant_results} | jq -c -r '.[]' | while read tenant
   do
     tenant_name=$(echo ${tenant} | jq -c -r '.name')
     tenant_url=$(echo ${tenant} | jq -c -r '.url')
-    echo ${tenant_url}
     if [[ ${tenant_name} != "admin" ]] ; then
       echo "++++ deletion of tenant: ${tenant_name}, url ${tenant_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${tenant_url} | grep / | cut -d/ -f4-)"
