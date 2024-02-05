@@ -63,6 +63,8 @@ if [[ ${tenant_count} == 1 && ${create} == "true" ]] ; then
         "tenant_access_to_provider_se": '$(jq -c -r '.tenant.config_settings.tenant_access_to_provider_se' ${avi_settings_file})'
       }
     }'
+    echo ${json_data}
+    echo ${json_data} | jq .
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/tenant"
     ((count++))
   done
