@@ -25,3 +25,10 @@ avi_version=$(jq -c -r .avi_credentials.api_version $avi_auth_file)
 curl_login=$(curl -s -k -X POST -H "Content-Type: application/json" \
                                 -d "{\"username\": \"${avi_username}\", \"password\": \"${avi_password}\"}" \
                                 -c ${avi_cookie_file} https://${avi_controller}/login)
+#
+csrftoken=$(cat ${avi_cookie_file} | grep csrftoken | awk '{print $7}')
+#
+alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/tenant"
+tenant_count=$(echo $response_body | jq -c -r '.count')
+echo $tenant_count
+
