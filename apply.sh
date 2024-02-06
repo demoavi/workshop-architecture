@@ -239,14 +239,12 @@ if [[ ${create} == "false" ]] ; then
   done
   #
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/serviceengine"
-  destroy_se=0
   echo $response_body | jq -c -r '.results[]' | while read se
   do
     se_url=$(echo ${se} | jq -c -r '.url')
     se_tenant_uuid=$(echo ${se} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
     se_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${se_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
     if [[ ${se_tenant_name} != "admin" ]] ; then
-      destroy_se=1
       echo "++++ deletion of se: url ${se_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${se_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${se_url} | grep / | cut -d/ -f4-)"
     fi    
@@ -267,9 +265,7 @@ if [[ ${create} == "false" ]] ; then
     tenant_name=$(echo ${tenant} | jq -c -r '.name')
     tenant_url=$(echo ${tenant} | jq -c -r '.url')
     if [[ ${tenant_name} != "admin" ]] ; then
-      if [[ ${destroy_se} == 1 ]] ; then
-        sleep 180
-      fi
+      sleep 180
       echo "++++ deletion of tenant: ${tenant_name}, url ${tenant_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${tenant_url} | grep / | cut -d/ -f4-)"
     fi
