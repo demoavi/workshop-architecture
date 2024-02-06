@@ -131,6 +131,7 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
          }
        ]
     }'
+    echo ${json_data}
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/vsvip"
     ((count++))
   done
