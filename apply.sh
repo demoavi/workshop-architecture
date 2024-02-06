@@ -203,13 +203,25 @@ if [[ ${create} == "false" ]] ; then
     pool_name=$(echo ${pool} | jq -c -r '.name')
     pool_url=$(echo ${pool} | jq -c -r '.url')
     pool_tenant_uuid=$(echo ${pool} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-    poll_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${pool_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
-    if [[ ${poll_tenant_name} != "admin" ]] ; then
+    pool_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${pool_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+    if [[ ${pool_tenant_name} != "admin" ]] ; then
       echo "++++ deletion of pool: ${pool_name}, url ${pool_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${pool_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${pool_url} | grep / | cut -d/ -f4-)"
     fi    
   done
-  exit
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/healthmonitor"
+  echo $response_body | jq -c -r '.results[]' | while read hm
+  do
+    hm_name=$(echo ${hm} | jq -c -r '.name')
+    hm_url=$(echo ${hm} | jq -c -r '.url')
+    hm_tenant_uuid=$(echo ${hm} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
+    hm_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${hm_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+    if [[ ${hm_tenant_name} != "admin" ]] ; then
+      echo "++++ deletion of health monitor: ${hm_name}, url ${hm_url}"
+      alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${hm_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${hm_url} | grep / | cut -d/ -f4-)"
+    fi    
+  done
+  exit  
   IFS=$'\n'
   for user in $(echo ${user_results} | jq -c -r '.[]')
   do
