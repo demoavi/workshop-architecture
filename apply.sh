@@ -260,11 +260,11 @@ if [[ ${create} == "false" ]] ; then
     fi    
   done
   #
+  count=1
   echo ${tenant_results} | jq -c -r '.[]' | while read tenant
   do
     tenant_name=$(echo ${tenant} | jq -c -r '.name')
     tenant_url=$(echo ${tenant} | jq -c -r '.url')
-    count=1
     if [[ ${tenant_name} != "admin" ]] ; then
       if [[ ${count} == 1 ]] ; then
         echo "++++ wait for 180 secs for the time to remove the SE"
