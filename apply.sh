@@ -197,6 +197,7 @@ if [[ ${create} == "false" ]] ; then
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${vs_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${vs_url} | grep / | cut -d/ -f4-)"
     fi    
   done
+  #
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/pool"
   echo $response_body | jq -c -r '.results[]' | while read pool
   do
@@ -209,6 +210,7 @@ if [[ ${create} == "false" ]] ; then
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${pool_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${pool_url} | grep / | cut -d/ -f4-)"
     fi    
   done
+  #
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/healthmonitor"
   IFS=$'\n'
   for hm in $(echo ${response_body} | jq -c -r '.results[]')
@@ -225,7 +227,20 @@ if [[ ${create} == "false" ]] ; then
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${hm_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${hm_url} | grep / | cut -d/ -f4-)"
     fi    
   done
-  exit  
+  #
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/vsvip"
+  echo $response_body | jq -c -r '.results[]' | while read vsvip
+  do
+    vsvip_name=$(echo ${vsvip} | jq -c -r '.name')
+    vsvip_url=$(echo ${vsvip} | jq -c -r '.url')
+    vsvip_tenant_uuid=$(echo ${vsvip} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
+    vsvip_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${vsvip_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+    if [[ ${vsvip_tenant_name} != "admin" ]] ; then
+      echo "++++ deletion of vsvip: ${vsvip_name}, url ${vsvip_url}"
+      alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${vsvip_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${vsvip_url} | grep / | cut -d/ -f4-)"
+    fi    
+  done
+  #
   IFS=$'\n'
   for user in $(echo ${user_results} | jq -c -r '.[]')
   do
@@ -247,4 +262,3 @@ if [[ ${create} == "false" ]] ; then
     fi
   done
 fi
-#
