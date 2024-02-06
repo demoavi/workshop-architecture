@@ -15,7 +15,7 @@
     "name": "Default-Cloud"
   },  
   "vsvvip": {
-    "basename": "vsvip",
+    "basename": "-vsvip",
     "availability_zone": "eu-west-2a",
     "addr": "10.0.20.0",
     "mask": "22",
