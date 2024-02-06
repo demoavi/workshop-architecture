@@ -55,8 +55,8 @@
     "basename": "-vs",
     "port": "443",
     "ssl": "true",
-    "applicationProfile": "System-Secure-HTTP",
-    "sslProfile": "System-Standard",
-    "sslCert": "System-Default-Cert"
+    "application_profile_ref": "System-Secure-HTTP",
+    "ssl_profile_ref": "System-Standard",
+    "ssl_key_and_certificate_ref": "System-Default-Cert"
   }
 }
