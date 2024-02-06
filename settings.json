@@ -21,5 +21,8 @@
     "mask": "22",
     "type": "V4",
     "domain": "demoavi.us"
-  }  
+  },
+  "vs": {
+    "basename": "-vs"
+  }
 }
