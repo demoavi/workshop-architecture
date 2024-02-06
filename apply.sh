@@ -192,9 +192,21 @@ if [[ ${create} == "false" ]] ; then
     vs_url=$(echo ${vs} | jq -c -r '.url')
     vs_tenant_uuid=$(echo ${vs} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
     vs_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${vs_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
-    if [[ ${vs_name} != "Reflector" ]] ; then
+    if [[ ${vs_tenant_name} != "admin" ]] ; then
       echo "++++ deletion of vs: ${vs_name}, url ${vs_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${vs_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${vs_url} | grep / | cut -d/ -f4-)"
+    fi    
+  done
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/pool"
+  echo $response_body | jq -c -r '.results[]' | while read pool
+  do
+    pool_name=$(echo ${pool} | jq -c -r '.name')
+    pool_url=$(echo ${pool} | jq -c -r '.url')
+    pool_tenant_uuid=$(echo ${pool} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
+    poll_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${pool_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+    if [[ ${poll_tenant_name} != "admin" ]] ; then
+      echo "++++ deletion of pool: ${pool_name}, url ${pool_url}"
+      alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${pool_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${pool_url} | grep / | cut -d/ -f4-)"
     fi    
   done
   exit
