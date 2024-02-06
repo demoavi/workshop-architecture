@@ -114,7 +114,7 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
            {
              "subnet":
              {
-               "mask": "'$(jq -c -r '.vsvip.mask' ${avi_settings_file})'",
+               "mask": '$(jq -c -r '.vsvip.mask' ${avi_settings_file})',
                "ip_addr":
                {
                  "type": "'$(jq -c -r '.vsvip.type' ${avi_settings_file})'",
