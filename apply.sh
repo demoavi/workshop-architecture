@@ -191,7 +191,7 @@ if [[ ${create} == "false" ]] ; then
     vs_name=$(echo ${vs} | jq -c -r '.name')
     vs_url=$(echo ${vs} | jq -c -r '.url')
     vs_tenant_uuid=$(echo ${vs} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-    vs_tenant_name=(echo ${tenant_results} | jq -c -r --arg arg "${vs_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+    vs_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${vs_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
     if [[ ${vs_name} != "Reflector" ]] ; then
       echo "++++ deletion of vs: ${vs_name}, url ${vs_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${vs_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${vs_url} | grep / | cut -d/ -f4-)"
