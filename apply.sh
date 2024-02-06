@@ -98,6 +98,40 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
       "user_profile_ref": "/api/useraccountprofile/?name='$(jq -c -r '.user.user_profile_ref' ${avi_settings_file})'"
     }'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/user"
+    echo "+++ vsvip creation"
+    json_data='
+    {
+       "cloud_ref": "/api/cloud/?name='$(jq -c -r '.cloud.name' ${avi_settings_file})'",
+       "tenant_ref": "/api/tenant/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
+       "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.vsvip.basename' ${avi_settings_file})'",
+       "vip":
+       [
+         {
+           "auto_allocate_ip": true,
+           "auto_allocate_floating_ip": true,
+           "availability_zone": "'$(jq -c -r '.vsvip.availability_zone' ${avi_settings_file})'",
+           "ipam_network_subnet":
+           {
+             "subnet":
+             {
+               "mask": "'$(jq -c -r '.vsvip.mask' ${avi_settings_file})'",
+               "ip_addr":
+               {
+                 "type": "'$(jq -c -r '.vsvip.type' ${avi_settings_file})'",
+                 "addr": "'$(jq -c -r '.vsvip.addr' ${avi_settings_file})'"
+               }
+             }
+           }
+         }
+       ],
+       "dns_info":
+       [
+         {
+           "fqdn": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.vs.basename' ${avi_settings_file})'.'$(jq -c -r '.vsvip.domain' ${avi_settings_file})'"
+         }
+       ]
+    }'
+    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/vsvip"
     ((count++))
   done
 fi
