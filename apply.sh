@@ -74,7 +74,7 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
   count=1
   jq -c -r .[] $avi_attendees_file | while read attendee
   do
-    echo "++++ creation of tenant: $(jq -c -r '.tenant.basename' ${avi_settings_file})${count}"
+    echo "++++ tenant creation: $(jq -c -r '.tenant.basename' ${avi_settings_file})${count}"
     json_data='
     {
       "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
@@ -86,7 +86,7 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
     }'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/tenant"
     tenant_ref=$(echo $response_body | jq -c -r '.url')
-    echo "+++ users creation"
+    echo "+++ user creation"
     json_data='
     {
       "access": [
@@ -107,7 +107,7 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
       "user_profile_ref": "/api/useraccountprofile/?name='$(jq -c -r '.user.user_profile_ref' ${avi_settings_file})'"
     }'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/user"
-    echo "+++ hms creation"
+    echo "+++ hm creation"
     json_data='
     {
       "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.healthmonitor.basename' ${avi_settings_file})'",
@@ -121,9 +121,9 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
         "http_response_code": '$(jq -c -r '.healthmonitor.http_response_code' ${avi_settings_file})'
       }  
     }'
-    echo ${json_data} | jq -c -r '.'    
+    #echo ${json_data} | jq -c -r '.'    
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/healthmonitor"
-    echo "+++ pools creation"
+    echo "+++ pool creation"
     json_data='
     {
       "cloud_ref": "/api/cloud/?name='$(jq -c -r '.cloud.name' ${avi_settings_file})'",
@@ -131,7 +131,7 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
       "health_monitor_refs": ["/api/healthmonitor/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.healthmonitor.basename' ${avi_settings_file})'"],
       "servers": '$(jq -c -r '.pool.servers' ${avi_settings_file})'
     }'
-    echo ${json_data} | jq -c -r '.'
+    #echo ${json_data} | jq -c -r '.'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/pool"
     echo "+++ vsvip creation"
     json_data='
@@ -166,9 +166,9 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
          }
        ]
     }'
-    echo ${json_data} | jq -c -r '.'
+    #echo ${json_data} | jq -c -r '.'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/vsvip"    
-    echo "+++ VSs creation"
+    echo "+++ vs creation"
     json_data='
     {
       "cloud_ref": "/api/cloud/?name='$(jq -c -r '.cloud.name' ${avi_settings_file})'",
@@ -185,14 +185,15 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
         }
       ]
     }'
-    echo ${json_data} | jq -c -r '.'
+    #echo ${json_data} | jq -c -r '.'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/virtualservice"
-    echo "++++ New Users ++++"
     ((count++))
   done
 fi
 #
-# destroy // delete all the users (except admin user) and the tenants (except admin tenant)
+# destroy // delete all vs, pool, hm, vsvip which are not in the admin tenant
+#                       the users (except admin user) and the tenants (except admin tenant)
+#
 if [[ ${create} == "false" ]] ; then
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/virtualservice"
   echo $response_body | jq -c -r '.results[]' | while read vs
