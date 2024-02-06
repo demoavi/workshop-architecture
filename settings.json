@@ -52,6 +52,11 @@
     ]
   },
   "vs": {
-    "basename": "-vs"
+    "basename": "-vs",
+    "port": "443",
+    "ssl": "true",
+    "applicationProfile": "System-Secure-HTTP",
+    "sslProfile": "System-Standard",
+    "sslCert": "System-Default-Cert"
   }
 }
