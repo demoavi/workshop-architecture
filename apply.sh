@@ -210,7 +210,8 @@ if [[ ${create} == "false" ]] ; then
     fi    
   done
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/healthmonitor"
-  echo $response_body | jq -c -r '.results[]' | while read hm
+  IFS=$'\n'
+  for hm in $(echo ${response_body} | jq -c -r '.[]')
   do
     hm_name=$(echo ${hm} | jq -c -r '.name')
     echo ${hm_name}
