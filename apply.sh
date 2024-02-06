@@ -185,6 +185,17 @@ fi
 #
 # destroy // delete all the users (except admin user) and the tenants (except admin tenant)
 if [[ ${create} == "false" ]] ; then
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "*" "${avi_controller}" "api/virtualservice"
+  echo $response_body | jq -c -r '.results[]' | while read vs
+  do
+    vs_name=$(echo ${vs} | jq -c -r '.name')
+    vs_url=$(echo ${vs} | jq -c -r '.url')
+    if [[ ${vs_name} != "Reflector" ]] ; then
+      echo "++++ deletion of vs: ${vs_name}, url ${vs_url}"
+      alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "" "${avi_version}" "" "${avi_controller}" "$(echo ${vs_url} | grep / | cut -d/ -f4-)"
+    fi    
+  done
+  exit
   IFS=$'\n'
   for user in $(echo ${user_results} | jq -c -r '.[]')
   do
