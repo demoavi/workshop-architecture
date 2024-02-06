@@ -98,6 +98,34 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
       "user_profile_ref": "/api/useraccountprofile/?name='$(jq -c -r '.user.user_profile_ref' ${avi_settings_file})'"
     }'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/user"
+    echo "+++ hms creation"
+    json_data='
+    {
+      "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.healthmonitor.basename' ${avi_settings_file})'",
+      "type": "'$(jq -c -r '.healthmonitor.type' ${avi_settings_file})'",
+      "receive_timeout": "'$(jq -c -r '.healthmonitor.receive_timeout' ${avi_settings_file})'",
+      "failed_checks": "'$(jq -c -r '.healthmonitor.failed_checks' ${avi_settings_file})'",
+      "send_interval": "'$(jq -c -r '.healthmonitor.send_interval' ${avi_settings_file})'",
+      "successful_checks": "'$(jq -c -r '.healthmonitor.successful_checks' ${avi_settings_file})'",
+      "http_monitor": {
+        "http_request": "'$(jq -c -r '.healthmonitor.http_request' ${avi_settings_file})'",
+        "http_response_code": '$(jq -c -r '.healthmonitor.http_response_code' ${avi_settings_file})'
+      }  
+    }'
+    echo ${json_data}
+    echo ${json_data} | jq -c -r '.'    
+    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/healthmonitor"
+    echo "+++ pools creation"
+    json_data='
+    {
+      "cloud_ref": "/api/cloud/?name='$(jq -c -r '.cloud.name' ${avi_settings_file})'",
+      "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.pool.basename' ${avi_settings_file})'",
+      "health_monitor_refs": ["/api/healthmonitor/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.healthmonitor.basename' ${avi_settings_file})'"]
+      "servers": '$(jq -c -r '.pool.servers' ${avi_settings_file})'
+    }'
+    echo ${json_data} | jq -c -r '.'
+    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/pool"
+    exit
     echo "+++ vsvip creation"
     json_data='
     {
@@ -132,17 +160,7 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
        ]
     }'
     echo ${json_data} | jq -c -r '.'
-    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/vsvip"
-    echo "+++ pools creation"
-    json_data='
-    {
-      "cloud_ref": "/api/cloud/?name='$(jq -c -r '.cloud.name' ${avi_settings_file})'",
-      "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.pool.basename' ${avi_settings_file})'",
-      "servers": '$(jq -c -r '.pool.servers' ${avi_settings_file})'
-    }'
-    echo ${json_data}
-    echo ${json_data} | jq -c -r '.'
-    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/pool"
+    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/vsvip"    
     echo "+++ VSs creation"
     json_data='
     {
