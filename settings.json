@@ -1,6 +1,6 @@
 {
   "tenant": {
-    "basename": "tenant00",
+    "basename": "tenant",
     "config_settings": {
       "tenant_vrf": false,
       "se_in_provider_context": false,
