@@ -19,6 +19,7 @@
     "availability_zone": "eu-west-2a",
     "addr": "10.0.20.0",
     "mask": "22",
-    "type": "V4"
+    "type": "V4",
+    "domain": "demoavi.us"
   }  
 }
