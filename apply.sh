@@ -149,7 +149,7 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
       "cloud_ref": "/api/cloud/?name='$(jq -c -r '.cloud.name' ${avi_settings_file})'",
       "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.vs.basename' ${avi_settings_file})'",
       "pool_ref": "/api/pool/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.pool.basename' ${avi_settings_file})'",
-      "application_profile_ref": "/api/application_profile/?name='$(jq -c -r '.vs.application_profile_ref' ${avi_settings_file})'",
+      "application_profile_ref": "/api/applicationprofile/?name='$(jq -c -r '.vs.application_profile_ref' ${avi_settings_file})'",
       "ssl_profile_ref": "/api/sslprofile/?name='$(jq -c -r '.vs.ssl_profile_ref' ${avi_settings_file})'",
       "ssl_key_and_certificate_refs": ["/api/sslkeyandcertificate/?name='$(jq -c -r '.vs.ssl_key_and_certificate_ref' ${avi_settings_file})'"],
       "vsvip_ref": "/api/pool/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.vsvip.basename' ${avi_settings_file})'",
