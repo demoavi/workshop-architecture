@@ -143,6 +143,26 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
     echo ${json_data}
     echo ${json_data} | jq -c -r '.'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/pool"
+    echo "+++ VSs creation"
+    json_data='
+    {
+      "cloud_ref": "/api/cloud/?name='$(jq -c -r '.cloud.name' ${avi_settings_file})'",
+      "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.vs.basename' ${avi_settings_file})'",
+      "pool_ref": "/api/pool/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.pool.basename' ${avi_settings_file})'",
+      "application_profile_ref": "/api/application_profile/?name='$(jq -c -r '.vs.application_profile_ref' ${avi_settings_file})'",
+      "ssl_profile_ref": "/api/sslprofile/?name='$(jq -c -r '.vs.ssl_profile_ref' ${avi_settings_file})'",
+      "ssl_key_and_certificate_refs": ["/api/sslkeyandcertificate/?name='$(jq -c -r '.vs.ssl_key_and_certificate_ref' ${avi_settings_file})'"],
+      "vsvip_ref": "/api/pool/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.vsvip.basename' ${avi_settings_file})'",
+      "services": [
+        {
+          "port": "'$(jq -c -r '.vs.port' ${avi_settings_file})'",
+          "enable_ssl": "'$(jq -c -r '.vs.enable_ssl' ${avi_settings_file})'"
+        }
+      ]
+    }'
+    echo ${json_data}
+    echo ${json_data} | jq -c -r '.'
+    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/virtualservice"
     ((count++))
   done
 fi
