@@ -6,10 +6,10 @@ yq -c -r . /home/ubuntu/actions-runner/_work/workshop-architecture/workshop-arch
 jsonFile="/home/ubuntu/vars.json"
 avi_settings_file="/home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/settings.json"
 #
-if [[ $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "emea" && \
+if [[ $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "europe" && \
       $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "us" && \
-      $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "apj" ]] ; then
-  echo "+++ .zone should equal to one of the following: 'emea, us, apj'"
+      $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "asia" ]] ; then
+  echo "+++ .zone should equal to one of the following: 'europe, us, asia'"
   exit 255
 fi
 #
@@ -264,10 +264,15 @@ if [[ ${create} == "false" ]] ; then
   do
     tenant_name=$(echo ${tenant} | jq -c -r '.name')
     tenant_url=$(echo ${tenant} | jq -c -r '.url')
+    count=1
     if [[ ${tenant_name} != "admin" ]] ; then
-      sleep 180
+      if [[ ${count} == 1 ]] ; then
+        echo "++++ wait for 180 secs for the time to remove the SE"
+        sleep 180
+      fi
       echo "++++ deletion of tenant: ${tenant_name}, url ${tenant_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${tenant_url} | grep / | cut -d/ -f4-)"
+      ((count++))
     fi
   done
 fi
