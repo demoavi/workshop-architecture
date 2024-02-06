@@ -54,7 +54,7 @@
   "vs": {
     "basename": "-vs",
     "port": "443",
-    "ssl": "true",
+    "enable_ssl": "true",
     "application_profile_ref": "System-Secure-HTTP",
     "ssl_profile_ref": "System-Standard",
     "ssl_key_and_certificate_ref": "System-Default-Cert"
