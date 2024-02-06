@@ -42,11 +42,11 @@ curl_login=$(curl -s -k -X POST -H "Content-Type: application/json" \
 #
 csrftoken=$(cat ${avi_cookie_file} | grep csrftoken | awk '{print $7}')
 #
-alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/tenant"
+alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/tenant?page_size=-1"
 tenant_count=$(echo $response_body | jq -c -r '.count')
 tenant_results=$(echo $response_body | jq -c -r '.results')
 #
-alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/user"
+alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/user?page_size=-1"
 user_count=$(echo $response_body | jq -c -r '.count')
 user_results=$(echo $response_body | jq -c -r '.results')
 #
@@ -195,7 +195,7 @@ fi
 #                       the users (except admin user) and the tenants (except admin tenant)
 #
 if [[ ${create} == "false" ]] ; then
-  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/virtualservice"
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/virtualservice?page_size=-1"
   echo $response_body | jq -c -r '.results[]' | while read vs
   do
     vs_name=$(echo ${vs} | jq -c -r '.name')
@@ -208,7 +208,7 @@ if [[ ${create} == "false" ]] ; then
     fi    
   done
   #
-  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/pool"
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/pool?page_size=-1"
   echo $response_body | jq -c -r '.results[]' | while read pool
   do
     pool_name=$(echo ${pool} | jq -c -r '.name')
@@ -221,7 +221,7 @@ if [[ ${create} == "false" ]] ; then
     fi    
   done
   #
-  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/healthmonitor"
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/healthmonitor?page_size=-1"
   IFS=$'\n'
   for hm in $(echo ${response_body} | jq -c -r '.results[]')
   do
@@ -235,7 +235,7 @@ if [[ ${create} == "false" ]] ; then
     fi    
   done
   #
-  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/vsvip"
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/vsvip?page_size=-1"
   echo $response_body | jq -c -r '.results[]' | while read vsvip
   do
     vsvip_name=$(echo ${vsvip} | jq -c -r '.name')
@@ -248,7 +248,7 @@ if [[ ${create} == "false" ]] ; then
     fi    
   done
   #
-  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/serviceengine"
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/serviceengine?page_size=-1"
   echo $response_body | jq -c -r '.results[]' | while read se
   do
     se_url=$(echo ${se} | jq -c -r '.url')
