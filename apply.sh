@@ -213,8 +213,11 @@ if [[ ${create} == "false" ]] ; then
   echo $response_body | jq -c -r '.results[]' | while read hm
   do
     hm_name=$(echo ${hm} | jq -c -r '.name')
+    echo ${hm_name}
     hm_url=$(echo ${hm} | jq -c -r '.url')
+    echo ${hm_url}
     hm_tenant_uuid=$(echo ${hm} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
+    echo ${hm_tenant_uuid}
     hm_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${hm_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
     if [[ ${hm_tenant_name} != "admin" ]] ; then
       echo "++++ deletion of health monitor: ${hm_name}, url ${hm_url}"
