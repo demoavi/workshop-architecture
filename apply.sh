@@ -133,6 +133,14 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
     }'
     echo ${json_data} | jq -c -r '.'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/vsvip"
+    echo "+++ pools creation"
+    json_data='
+    {
+      "cloud_ref": "/api/cloud/?name='$(jq -c -r '.cloud.name' ${avi_settings_file})'",
+      "name": "'$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}''$(jq -c -r '.pool.basename' ${avi_settings_file})'",
+      "servers": "'$(jq -c -r '.pool.servers' ${avi_settings_file})'"
+    }'
+    alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}" "${avi_version}" "${json_data}" "${avi_controller}" "api/pool"
     ((count++))
   done
 fi
