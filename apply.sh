@@ -104,7 +104,6 @@ fi
 #
 # destroy // delete all the users (except admin user) and the tenants (except admin tenant)
 if [[ ${create} == "false" ]] ; then
-  echo "+++ users deletion"
   IFS=$'\n'
   for user in $(echo ${user_results} | jq -c -r '.[]')
   do
@@ -116,7 +115,6 @@ if [[ ${create} == "false" ]] ; then
     fi    
   done
   #
-  echo "+++ tenants deletion"
   echo ${tenant_results} | jq -c -r '.[]' | while read tenant
   do
     tenant_name=$(echo ${tenant} | jq -c -r '.name')
