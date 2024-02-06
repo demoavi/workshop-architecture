@@ -2,8 +2,9 @@
 #
 source /home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/bash/avi/avi_api.sh
 #
-yq -c -r . /home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/vars.yml | tee /home/ubuntu/vars.json
 jsonFile="/home/ubuntu/vars.json"
+yq -c -r . /home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/vars.yml | tee ${jsonFile}
+#
 avi_settings_file="/home/ubuntu/actions-runner/_work/workshop-architecture/workshop-architecture/settings.json"
 #
 if [[ $(jq -c -r '.zone' $jsonFile | tr '[:upper:]' [:lower:]) != "europe" && \
@@ -24,9 +25,11 @@ create=$(jq -c -r '.create' $jsonFile | tr '[:upper:]' [:lower:])
 #
 avi_auth_file="/home/ubuntu/.avicreds-${zone}.json"
 avi_attendees_file="/home/ubuntu/attendees-${zone}.json"
+avi_attendee_txt="/home/ubuntu/attendees-${zone}.txt"
 avi_cookie_file="/home/ubuntu/avi_cookie_${zone}.txt"
 avi_attendee_password=$(jq -c -r '.default_attendee_password' /home/ubuntu/.avi_attendee_password.json)
 rm -f ${avi_cookie_file}
+#
 #
 avi_username=$(jq -c -r .avi_credentials.username $avi_auth_file)
 avi_password=$(jq -c -r .avi_credentials.password $avi_auth_file)
@@ -61,6 +64,12 @@ fi
 #
 # create // tenants and users don't exist
 if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; then
+  # create json file from txt file
+  rm -f ${avi_attendees_file}
+  json_attendees_list="[]"
+  while read -r line; do json_attendees_list=$(echo $json_attendees_list | jq '. += ["'${line}'"]') ; done < "${avi_attendee_txt}"
+  echo ${json_attendees_list} | jq . | tee ${avi_attendees_file}
+  #
   echo "+++ tenants creation"
   count=1
   jq -c -r .[] $avi_attendees_file | while read attendee
