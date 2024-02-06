@@ -11,6 +11,9 @@
     "role_ref": "Tenant-Admin",
     "user_profile_ref": "Default-User-Account-Profile"
   },
+  "cloud": {
+    "name": "Default-Cloud"
+  },  
   "vsvvip": {
     "basename": "vsvip",
     "availability_zone": "eu-west-2a",
