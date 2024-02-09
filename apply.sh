@@ -277,8 +277,8 @@ if [[ ${create} == "false" ]] ; then
     tenant_url=$(echo ${tenant} | jq -c -r '.url')
     if [[ ${tenant_name} != "admin" ]] ; then
       if [[ ${count} == 1 ]] ; then
-        echo "++++ wait for 180 secs for the time to remove the SE"
-        sleep 180
+        echo "++++ wait for 240 secs for the time to remove the SE"
+        sleep 240
       fi
       echo "++++ deletion of tenant: ${tenant_name}, url ${tenant_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${tenant_url} | grep / | cut -d/ -f4-)"
