@@ -265,10 +265,17 @@ if [[ ${create} == "false" ]] ; then
   done
   #
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/useractivity?page_size=-1"
-  useractivity_count=$(echo $response_body | jq -c -r '.count')
+  #useractivity_count=$(echo $response_body | jq -c -r '.count')
   useractivity_results=$(echo $response_body | jq -c -r '.results')
   date_index=$(date '+%Y%m%d%H%M%S')
-  echo ${useractivity_results} | tee /home/ubuntu/useractivity-${date_index}-${zone}.json
+  echo ${useractivity_results} | jq -c -r '.[]' | while read useractivity
+  do
+    useractivity_name=$(echo ${useractivity} | jq -c -r '.name')
+    if [[ ${useractivity_name} != "admin" && $(echo ${useractivity} | jq -e '.last_login_ip' > /dev/null) ]] ; then
+      echo "++++ record of user: ${useractivity_name} which had activity"
+      echo ${useractivity_name} | tee -a /home/ubuntu/useractivity-${date_index}-${zone}.json
+    fi
+  done
   #
   for user in $(echo ${user_results} | jq -c -r '.[]')
   do
