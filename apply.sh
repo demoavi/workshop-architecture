@@ -263,7 +263,13 @@ if [[ ${create} == "false" ]] ; then
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${se_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${se_url} | grep / | cut -d/ -f4-)"
     fi    
   done
-  #  
+  #
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/useractivity?page_size=-1"
+  useractivity_count=$(echo $response_body | jq -c -r '.count')
+  useractivity_results=$(echo $response_body | jq -c -r '.results')
+  date_index=$(date '+%Y%m%d%H%M%S')
+  echo ${useractivity_results} | tee /home/ubuntu/useractivity-${date_index}-${zone}.json
+  #
   for user in $(echo ${user_results} | jq -c -r '.[]')
   do
     user_name=$(echo ${user} | jq -c -r '.username')
