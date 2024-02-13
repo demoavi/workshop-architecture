@@ -68,7 +68,7 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
   rm -f ${avi_attendees_file}
   json_attendees_list="[]"
   while read -r line; do json_attendees_list=$(echo $json_attendees_list | jq '. += ["'${line}'"]') ; done < "${avi_attendee_txt}"
-  echo ${json_attendees_list} | jq . | tee ${avi_attendees_file}
+  echo ${json_attendees_list} | | tr '[:upper:]' [:lower:] | jq . | tee ${avi_attendees_file}
   #
   echo "+++ tenants creation"
   count=1
