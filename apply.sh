@@ -107,6 +107,10 @@ if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; the
       "user_profile_ref": "/api/useraccountprofile/?name='$(jq -c -r '.user.user_profile_ref' ${avi_settings_file})'"
     }'
     alb_api 2 1 "POST" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "${json_data}" "${avi_controller}" "api/user"
+    ((count++))
+  done
+  jq -c -r .[] $avi_attendees_file | while read attendee
+  do
     echo "+++ hm creation"
     json_data='
     {
