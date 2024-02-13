@@ -271,9 +271,11 @@ if [[ ${create} == "false" ]] ; then
   echo ${useractivity_results} | jq -c -r '.[]' | while read useractivity
   do
     useractivity_name=$(echo ${useractivity} | jq -c -r '.name')
-    if [[ ${useractivity_name} != "admin" && $(echo ${useractivity} | jq -e '.last_login_ip' > /dev/null) ]] ; then
-      echo "++++ record of user: ${useractivity_name} which had activity"
-      echo ${useractivity_name} | tee -a /home/ubuntu/useractivity-${date_index}-${zone}.json
+    if $(echo ${useractivity} | jq -e '.last_login_ip' > /dev/null); then
+      if [[ ${useractivity_name} != "admin" ]] ; then
+        echo "++++ record of user: ${useractivity_name} which had activity"
+        echo ${useractivity_name} | tee -a /home/ubuntu/useractivity-${date_index}-${zone}.json
+      fi
     fi
   done
   #
