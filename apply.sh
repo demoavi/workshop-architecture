@@ -289,7 +289,13 @@ if [[ ${create} == "false" ]] ; then
           echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
           alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
         fi
-        if [[ ${object_to_remove} != "serviceenginegroup" && ${object_to_remove} != "analyticsprofile" ]] ; then 
+        if [[ ${object_to_remove} == "wafpolicy" ]] ; then
+          if [[ ${item_name} == "System-WAF-Policy" || ${item_name} == "System-WAF-Policy-VDI" ]] ; then
+            echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
+            alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
+          fi  
+        fi        
+        if [[ ${object_to_remove} != "serviceenginegroup" && ${object_to_remove} != "analyticsprofile" && ${object_to_remove} != "wafpolicy" ]] ; then 
           echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
           alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
         fi  
