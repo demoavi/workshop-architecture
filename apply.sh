@@ -266,7 +266,7 @@ if [[ ${create} == "false" ]] ; then
   #done
   #
   IFS=$'\n'
-  list_object_to_remove='["virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile"]'
+  list_object_to_remove='["virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicypsmgroup", "wafpolicy"]'
   for object_to_remove in $(echo $list_object_to_remove | jq -c -r .[])
   do
     if [[ ${object_to_remove} == "serviceenginegroup" && ${se_deletion} == "true" ]] ; then
