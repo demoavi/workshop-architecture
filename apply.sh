@@ -198,7 +198,7 @@ fi
 # destroy // delete all vs, pool, hm, vsvip which are not in the admin tenant
 #                       the users (except admin user) and the tenants (except admin tenant)
 #
-#if [[ ${create} == "false" ]] ; then
+if [[ ${create} == "false" ]] ; then
 #  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/virtualservice?page_size=-1"
 #  echo $response_body | jq -c -r '.results[]' | while read vs
 #  do
