@@ -266,7 +266,7 @@ if [[ ${create} == "false" ]] ; then
   #done
   #
   IFS=$'\n'
-  list_object_to_remove='["virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup"]'
+  list_object_to_remove='["virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile"]'
   for object_to_remove in $(echo $list_object_to_remove | jq -c -r .[])
   do
     if [[ ${object_to_remove} == "serviceenginegroup" && ${se_deletion} == "true" ]] ; then
@@ -285,7 +285,11 @@ if [[ ${create} == "false" ]] ; then
           echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
           alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
         fi
-        if [[ ${object_to_remove} != "serviceenginegroup" ]] ; then 
+        if [[ ${object_to_remove} == "analyticsprofile" && ${item_name} != "System-Analytics-Profile" ]] ; then
+          echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
+          alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
+        fi
+        if [[ ${object_to_remove} != "serviceenginegroup" && ${object_to_remove} != "analyticsprofile" ]] ; then 
           echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
           alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
         fi  
