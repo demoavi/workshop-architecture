@@ -199,74 +199,9 @@ fi
 #                       the users (except admin user) and the tenants (except admin tenant)
 #
 if [[ ${create} == "false" ]] ; then
-#  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/virtualservice?page_size=-1"
-#  echo $response_body | jq -c -r '.results[]' | while read vs
-#  do
-#    vs_name=$(echo ${vs} | jq -c -r '.name')
-#    vs_url=$(echo ${vs} | jq -c -r '.url')
-#    vs_tenant_uuid=$(echo ${vs} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-#    vs_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${vs_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
-#    if [[ ${vs_tenant_name} != "admin" ]] ; then
-#      echo "++++ deletion of vs: ${vs_name}, url ${vs_url}"
-#      alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${vs_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${vs_url} | grep / | cut -d/ -f4-)"
-#    fi    
-#  done
-  #
-  #alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/pool?page_size=-1"
-  #echo $response_body | jq -c -r '.results[]' | while read pool
-  #do
-  #  pool_name=$(echo ${pool} | jq -c -r '.name')
-  #  pool_url=$(echo ${pool} | jq -c -r '.url')
-  #  pool_tenant_uuid=$(echo ${pool} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-  #  pool_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${pool_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
-  #  if [[ ${pool_tenant_name} != "admin" ]] ; then
-  #    echo "++++ deletion of pool: ${pool_name}, url ${pool_url}"
-  #    alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${pool_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${pool_url} | grep / | cut -d/ -f4-)"
-  #  fi    
-  #done
-  #
-  #alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/healthmonitor?page_size=-1"
-  #IFS=$'\n'
-  #for hm in $(echo ${response_body} | jq -c -r '.results[]')
-  #do
-  #  hm_name=$(echo ${hm} | jq -c -r '.name')
-  #  hm_url=$(echo ${hm} | jq -c -r '.url')
-  #  hm_tenant_uuid=$(echo ${hm} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-  #  hm_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${hm_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
-  #  if [[ ${hm_tenant_name} != "admin" ]] ; then
-  #    echo "++++ deletion of health monitor: ${hm_name}, url ${hm_url}"
-  #    alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${hm_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${hm_url} | grep / | cut -d/ -f4-)"
-  # fi    
-  #done
-  #
-  #alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/vsvip?page_size=-1"
-  #echo $response_body | jq -c -r '.results[]' | while read vsvip
-  #do
-  #  vsvip_name=$(echo ${vsvip} | jq -c -r '.name')
-  #  vsvip_url=$(echo ${vsvip} | jq -c -r '.url')
-  #  vsvip_tenant_uuid=$(echo ${vsvip} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-  #  vsvip_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${vsvip_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
-  #  if [[ ${vsvip_tenant_name} != "admin" ]] ; then
-  #    echo "++++ deletion of vsvip: ${vsvip_name}, url ${vsvip_url}"
-  #    alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${vsvip_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${vsvip_url} | grep / | cut -d/ -f4-)"
-  #  fi    
-  #done
-  #
-  #alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/httppolicyset?page_size=-1"
-  #echo $response_body | jq -c -r '.results[]' | while read httppolicyset
-  #do
-  #  httppolicyset_name=$(echo ${httppolicyset} | jq -c -r '.name')
-  #  httppolicyset_url=$(echo ${httppolicyset} | jq -c -r '.url')
-  #  httppolicyset_tenant_uuid=$(echo ${httppolicyset} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-  #  httppolicyset_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${httppolicyset_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
-  #  if [[ ${httppolicyset_tenant_name} != "admin" ]] ; then
-  #    echo "++++ deletion of httppolicyset: ${httppolicyset_name}, url ${httppolicyset_url}"
-  #    alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${httppolicyset_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${httppolicyset_url} | grep / | cut -d/ -f4-)"
-  #  fi    
-  #done
   #
   IFS=$'\n'
-  list_object_to_remove='["virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicy", "wafpolicypsmgroup"]'
+  list_object_to_remove='["virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicy", "wafpolicypsmgroup", "httppolicyset"]'
   for object_to_remove in $(echo $list_object_to_remove | jq -c -r .[])
   do
     if [[ ${object_to_remove} == "serviceenginegroup" && ${se_deletion} == "true" ]] ; then
@@ -306,19 +241,6 @@ if [[ ${create} == "false" ]] ; then
     done
   done
   #
-  #alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/serviceengine?page_size=-1"
-  #echo $response_body | jq -c -r '.results[]' | while read se
-  #do
-  #  se_url=$(echo ${se} | jq -c -r '.url')
-  #  se_tenant_uuid=$(echo ${se} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-  #  se_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${se_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
-  #  if [[ ${se_tenant_name} != "admin" ]] ; then
-  #    echo "++++ deletion of se: url ${se_url}"
-  #    alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${se_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${se_url} | grep / | cut -d/ -f4-)"
-  #    se_deletion="true"
-  #  fi    
-  #done
-  #
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/useractivity?page_size=-1"
   #useractivity_count=$(echo $response_body | jq -c -r '.count')
   useractivity_results=$(echo $response_body | jq -c -r '.results')
@@ -350,10 +272,6 @@ if [[ ${create} == "false" ]] ; then
     tenant_name=$(echo ${tenant} | jq -c -r '.name')
     tenant_url=$(echo ${tenant} | jq -c -r '.url')
     if [[ ${tenant_name} != "admin" ]] ; then
-      if [[ ${count} == 1 && ${se_deletion} == "true" ]] ; then
-        echo "++++ wait for 240 secs for the time to remove the SE"
-        sleep 240
-      fi
       echo "++++ deletion of tenant: ${tenant_name}, url ${tenant_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${tenant_url} | grep / | cut -d/ -f4-)"
       ((count++))
