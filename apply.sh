@@ -252,6 +252,19 @@ if [[ ${create} == "false" ]] ; then
     fi    
   done
   #
+  alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/httppolicyset?page_size=-1"
+  echo $response_body | jq -c -r '.results[]' | while read httppolicyset
+  do
+    httppolicyset_name=$(echo ${httppolicyset} | jq -c -r '.name')
+    httppolicyset_url=$(echo ${httppolicyset} | jq -c -r '.url')
+    httppolicyset_tenant_uuid=$(echo ${httppolicyset} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
+    httppolicyset_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${httppolicyset_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+    if [[ ${httppolicyset_tenant_name} != "admin" ]] ; then
+      echo "++++ deletion of httppolicyset: ${httppolicyset_name}, url ${httppolicyset_url}"
+      alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${httppolicyset_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${httppolicyset_url} | grep / | cut -d/ -f4-)"
+    fi    
+  done
+  #
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/serviceengine?page_size=-1"
   echo $response_body | jq -c -r '.results[]' | while read se
   do
