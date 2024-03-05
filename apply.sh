@@ -271,7 +271,7 @@ if [[ ${create} == "false" ]] ; then
     item_name=$(echo ${item} | jq -c -r '.name')
     item_url=$(echo ${item} | jq -c -r '.url')
     item_tenant_uuid=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-    item_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${itemt_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+    item_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${item_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
     if [[ ${item_tenant_name} != "admin" ]] ; then
       echo "++++ deletion of networksecuritypolicy: ${item_name}, url ${item_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
