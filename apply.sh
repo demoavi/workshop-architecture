@@ -281,8 +281,14 @@ if [[ ${create} == "false" ]] ; then
       item_tenant_uuid=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
       item_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${item_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
       if [[ ${item_tenant_name} != "admin" ]] ; then
-        echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
-        alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
+        if [[ ${object_to_remove} == "serviceenginegroup" && ${item_name} != "Default-Group" ]] ; then
+          echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
+          alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
+        fi
+        if [[ ${object_to_remove} != "serviceenginegroup" ]] ; then 
+          echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
+          alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
+        fi  
         if [[ ${object_to_remove} == "serviceengine" ]] ; then
           se_deletion="true"
         fi  
