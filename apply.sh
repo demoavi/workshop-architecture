@@ -265,16 +265,17 @@ if [[ ${create} == "false" ]] ; then
   #  fi    
   #done
   #
+  IFS=$'\n'
   list_object_to_remove='["virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup"]'
   for object_to_remove in $(echo $list_object_to_remove | jq -c -r .[])
   do
+    if [[ ${object_to_remove} == "serviceenginegroup" && ${se_deletion} == "true" ]] ; then
+      echo "++++ wait for 240 secs for the time to remove the SE"
+      sleep 240
+    fi
     alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page_size=-1"
-    echo $response_body | jq -c -r '.results[]' | while read item
+    for item in $(echo ${response_body} | jq -c -r '.results[]')
     do
-      if [[ ${object_to_remove} == "serviceenginegroup" && ${se_deletion} == "true" ]] ; then
-        echo "++++ wait for 240 secs for the time to remove the SE"
-        sleep 240
-      fi
       item_name=$(echo ${item} | jq -c -r '.name')
       item_url=$(echo ${item} | jq -c -r '.url')
       item_tenant_uuid=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
@@ -287,7 +288,7 @@ if [[ ${create} == "false" ]] ; then
         fi  
       fi
     done
-  done  
+  done
   #
   #alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/serviceengine?page_size=-1"
   #echo $response_body | jq -c -r '.results[]' | while read se
