@@ -51,7 +51,7 @@ user_count=$(echo $response_body | jq -c -r '.count')
 user_results=$(echo $response_body | jq -c -r '.results')
 #
 # create // tenants already exist 
-if [[ ${tenant_count} == 3 && ${create} == "true" ]] ; then
+if [[ ${tenant_count} != 1 && ${create} == "true" ]] ; then
   echo "+++ script will exist because tenants already exist, please clean-up"
   exit
 fi
@@ -63,7 +63,7 @@ if [[ ${user_count} != 1 && ${create} == "true" ]] ; then
 fi
 #
 # create // tenants and users don't exist
-if [[ ${tenant_count} == 2 && ${user_count} == 1 && ${create} == "true" ]] ; then
+if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; then
   # create json file from txt file
   rm -f ${avi_attendees_file}
   json_attendees_list="[]"
@@ -71,7 +71,7 @@ if [[ ${tenant_count} == 2 && ${user_count} == 1 && ${create} == "true" ]] ; the
   echo ${json_attendees_list} | tr '[:upper:]' [:lower:] | jq . | tee ${avi_attendees_file}
   #
   echo "+++ tenants creation"
-  count=33
+  count=1
   jq -c -r .[] $avi_attendees_file | while read attendee
   do
     echo "++++ tenant creation: $(jq -c -r '.tenant.basename' ${avi_settings_file})${count}"
@@ -201,7 +201,7 @@ fi
 if [[ ${create} == "false" ]] ; then
   #
   IFS=$'\n'
-  list_object_to_remove='["alertconfig", "actiongroupconfig", "alertemailconfig", "virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicy", "wafpolicypsmgroup", "httppolicyset", "sslprofile"]'
+  list_object_to_remove='["alertconfig", "actiongroupconfig", "alertemailconfig", "virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicy", "wafpolicypsmgroup", "httppolicyset", "sslprofile", "autoscalelaunchconfig"]'
   for object_to_remove in $(echo $list_object_to_remove | jq -c -r .[])
   do
     if [[ ${object_to_remove} == "serviceenginegroup" && ${se_deletion} == "true" ]] ; then
