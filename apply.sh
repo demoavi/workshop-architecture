@@ -63,7 +63,7 @@ if [[ ${user_count} != 1 && ${create} == "true" ]] ; then
 fi
 #
 # create // tenants and users don't exist
-if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; then
+if [[ ${tenant_count} == 2 && ${user_count} == 1 && ${create} == "true" ]] ; then
   # create json file from txt file
   rm -f ${avi_attendees_file}
   json_attendees_list="[]"
