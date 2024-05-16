@@ -92,7 +92,7 @@ if [[ ${tenant_count} == 2 && ${user_count} == 1 && ${create} == "true" ]] ; the
       "access": [
         {
           "role_ref": "/api/role/?name='$(jq -c -r '.user.role_ref' ${avi_settings_file})'",
-          "tenant_ref": "/api/tenant/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${}'",
+          "tenant_ref": "/api/tenant/?name='$(jq -c -r '.tenant.basename' ${avi_settings_file})${count}'",
           "all_tenants": false
         }
       ],
