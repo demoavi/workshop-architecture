@@ -215,6 +215,8 @@ if [[ ${create} == "false" ]] ; then
       item_url=$(echo ${item} | jq -c -r '.url')
       item_tenant_uuid=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
       item_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${item_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+      echo ${object_to_remove}
+      echo ${item_tenant_name}
       if [[ ${object_to_remove} == "serviceengine" ]] ; then
         if $(echo $item | jq -e '.vs_refs' > /dev/null) ; then
           echo "++++ se ${item_name} is busy with vs"
