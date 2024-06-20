@@ -225,17 +225,7 @@ if [[ ${create} == "false" ]] ; then
           do
             item_name=$(echo ${item} | jq -c -r '.name')
             item_url=$(echo ${item} | jq -c -r '.url')
-            if [[ ${object_to_remove} == "analyticsprofile" && ${item_name} != "System-Analytics-Profile" ]] ; then
-              echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
-              alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
-            fi
-            if [[ ${object_to_remove} == "wafpolicy" ]] ; then
-              if [[ ${item_name} != "System-WAF-Policy" || ${item_name} != "System-WAF-Policy-VDI" ]] ; then
-                echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
-                alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
-              fi
-            fi
-            if [[ ${object_to_remove} != "analyticsprofile" && ${object_to_remove} != "wafpolicy" ]] ; then
+            if [[ ${item_name} != "System-*" ]] ; then
               echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
               alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
             fi

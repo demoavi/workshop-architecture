@@ -16,7 +16,6 @@ alb_api () {
   while true ; do
     response=$(curl -k -s -X "${3}" --write-out "\n\n%{http_code}" -b "${4}" -H "X-CSRFToken: ${5}" -H "X-Avi-Tenant: ${6}" -H "X-Avi-Version: ${7}" -H "Content-Type: application/json" -H "Referer: https://${9}" -d "${8}" https://${9}/${10})
     response_body=$(sed '$ d' <<< "$response")
-    echo $response_body
     response_code=$(tail -n1 <<< "$response")
     if [[ $response_code == 2[0-9][0-9] ]] ; then
       echo "    API call was successful"
@@ -26,7 +25,6 @@ alb_api () {
     fi
     if [ $attempt -eq $retry ]; then
       echo "    FAILED HTTP ${3} API call to https://${9}/${10}, response code was: $response_code"
-      echo "$response_body"
       exit 255
     fi
     sleep $pause
