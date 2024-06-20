@@ -210,7 +210,9 @@ if [[ ${create} == "false" ]] ; then
     fi
     alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page_size=-1"
     if [[ ${object_to_remove} == "virtualservice" ]] ; then
-      echo ${response_body} | jq -c -r '.results[]'
+      echo ${response_body}
+      echo test
+      echo $(echo ${response_body} | jq -c -r '.results[]')
     fi
     for item in $(echo ${response_body} | jq -c -r '.results[]')
     do
