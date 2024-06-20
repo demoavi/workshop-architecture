@@ -214,7 +214,7 @@ if [[ ${create} == "false" ]] ; then
     do
       tenant_name=$(echo ${tenant} | jq -c -r '.name')
       # ignoring admin tenant
-      if [[ ${tenant_name != "admin"} ]] ; then
+      if [[ ${tenant_name} != "admin"} ]] ; then
         #tenant_uuid=$(echo ${tenant} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
         next="true"
         page_count=1
