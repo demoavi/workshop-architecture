@@ -204,52 +204,52 @@ if [[ ${create} == "false" ]] ; then
   list_object_to_remove='["alertconfig", "actiongroupconfig", "alertemailconfig", "virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicy", "wafpolicypsmgroup", "httppolicyset", "sslprofile", "autoscalelaunchconfig"]'
   for object_to_remove in $(echo $list_object_to_remove | jq -c -r .[])
   do
-    if [[ ${object_to_remove} == "serviceenginegroup" && ${se_deletion} == "true" ]] ; then
-      echo "++++ wait for 240 secs for the time to remove the SE"
-      sleep 240
-    fi
-    alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page_size=-1"
-    if [[ ${object_to_remove} == "virtualservice" ]] ; then
-      echo ${response_body}
-      echo test
-      echo $(echo ${response_body} | jq -c -r '.results[]')
-    fi
-    for item in $(echo ${response_body} | jq -c -r '.results[]')
+    echo ${tenant_results} | jq -c -r '.[]' | while read tenant
     do
-      item_name=$(echo ${item} | jq -c -r '.name')
-      item_url=$(echo ${item} | jq -c -r '.url')
-      item_tenant_uuid=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-      item_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${item_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
-      echo ${object_to_remove}
-      echo ${item_tenant_name}
+      tenant_name=$(echo ${tenant} | jq -c -r '.name')
+      if [[ ${object_to_remove} == "serviceenginegroup" && ${se_deletion} == "true" ]] ; then
+        echo "++++ wait for 240 secs for the time to remove the SE"
+        sleep 240
+      fi
       if [[ ${object_to_remove} == "serviceengine" ]] ; then
-        if $(echo $item | jq -e '.vs_refs' > /dev/null) ; then
-          echo "++++ se ${item_name} is busy with vs"
-        else
+        tenant_name="admin"
+      fi
+      alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "${tenant_name}" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page_size=-1"
+      for item in $(echo ${response_body} | jq -c -r '.results[]')
+      do
+        item_name=$(echo ${item} | jq -c -r '.name')
+        item_url=$(echo ${item} | jq -c -r '.url')
+        item_tenant_uuid=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
+        item_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${item_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+        if [[ ${object_to_remove} == "serviceengine" ]] ; then
+          if $(echo $item | jq -e '.vs_refs' > /dev/null) ; then
+            echo "++++ se ${item_name} is busy with vs"
+          else
           se_deletion="true"
           alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
+          fi
         fi
-      fi
-      if [[ ${item_tenant_name} != "admin" && ${object_to_remove} != "serviceengine" ]] ; then
-        if [[ ${object_to_remove} == "serviceenginegroup" && ${item_name} != "Default-Group" ]] ; then
-          echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
-          alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
-        fi
-        if [[ ${object_to_remove} == "analyticsprofile" && ${item_name} != "System-Analytics-Profile" ]] ; then
-          echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
-          alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
-        fi
-        if [[ ${object_to_remove} == "wafpolicy" ]] ; then
-          if [[ ${item_name} != "System-WAF-Policy" || ${item_name} != "System-WAF-Policy-VDI" ]] ; then
+        if [[ ${item_tenant_name} != "admin" && ${object_to_remove} != "serviceengine" ]] ; then
+          if [[ ${object_to_remove} == "serviceenginegroup" && ${item_name} != "Default-Group" ]] ; then
             echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
             alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
-          fi  
-        fi        
-        if [[ ${object_to_remove} != "serviceenginegroup" && ${object_to_remove} != "analyticsprofile" && ${object_to_remove} != "wafpolicy" ]] ; then 
-          echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
-          alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
-        fi 
-      fi
+          fi
+          if [[ ${object_to_remove} == "analyticsprofile" && ${item_name} != "System-Analytics-Profile" ]] ; then
+            echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
+            alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
+          fi
+          if [[ ${object_to_remove} == "wafpolicy" ]] ; then
+            if [[ ${item_name} != "System-WAF-Policy" || ${item_name} != "System-WAF-Policy-VDI" ]] ; then
+              echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
+              alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"  
+            fi  
+          fi        
+          if [[ ${object_to_remove} != "serviceenginegroup" && ${object_to_remove} != "analyticsprofile" && ${object_to_remove} != "wafpolicy" ]] ; then 
+            echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
+            alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
+          fi 
+        fi
+      done  
     done
   done
   #
