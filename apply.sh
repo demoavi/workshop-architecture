@@ -205,62 +205,52 @@ fi
 #
 #
 if [[ ${create} == "false" ]] ; then
-  #
   IFS=$'\n'
-  list_object_to_remove='["alertconfig", "actiongroupconfig", "alertemailconfig", "virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicy", "wafpolicypsmgroup", "httppolicyset", "sslprofile", "autoscalelaunchconfig"]'
+  list_object_to_remove='["alertconfig", "actiongroupconfig", "alertemailconfig", "virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicy", "wafpolicypsmgroup", "httppolicyset", "sslprofile", "autoscalelaunchconfig", "cloudconnectoruser"]'
   for object_to_remove in $(echo $list_object_to_remove | jq -c -r .[])
   do
-    echo ${tenant_results} | jq -c -r '.[]' | while read tenant
+    next="true"
+    page_count=1
+    while [[ ${next} == "true" ]]
     do
-      tenant_name=$(echo ${tenant} | jq -c -r '.name')
-      # ignoring admin tenant
-      if [[ ${tenant_name} != "admin"} ]] ; then
-        #tenant_uuid=$(echo ${tenant} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
-        next="true"
-        page_count=1
-        while [[ ${next} == "true" ]]
-        do
-          alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page=${page_count}"
-          for item in $(echo ${response_body} | jq -c -r '.results[]')
-          do
-            item_name=$(echo ${item} | jq -c -r '.name')
-            item_url=$(echo ${item} | jq -c -r '.url')
-            if [[ ${item_name} != "System-*" ]] ; then
-              echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
-              alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
-            fi
-          done
-        if $(echo ${response_body} | jq -e '.next' > /dev/null) ; then
-          echo "Dealing with next page"
-          ((page_count++))
-        else
-          next="false"
+      alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page=${page_count}"
+      previous_count=$(echo ${response_body} | jq -c -r '.count')
+      for item in $(echo ${response_body} | jq -c -r '.results[]')
+      do
+        item_name=$(echo ${item} | jq -c -r '.name')
+        item_tenant_name=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
+        item_url=$(echo ${item} | jq -c -r '.url')
+        if [[ ${item_name} != System-* && ${item_name} != Syslog* && ${item_tenant_name} != "admin" && ${object_to_remove} != "serviceengine" ]] ; then
+          item_tenant_uuid=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
+          item_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${item_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
+          echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
+          alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "${item_tenant_name}" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
         fi
-        done
+        #
+        # SE removal
+        #
+        if [[ ${object_to_remove} == "serviceengine" ]] ; then
+          if $(echo ${item} | jq -e '.vs_refs' > /dev/null) ; then
+            echo "SE ${item_name} is busy with VS"
+          else
+            echo "++++ deletion of serviceengine: ${item_name}, url ${item_url}"
+            se_delete_flag="true"
+            alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
+          fi
+        fi
+      done
+      alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page=${page_count}"
+      new_count=$(echo ${response_body} | jq -c -r '.count')
+      if [[ ${previous_count} != ${new_count} ]]  ; then
+        echo "Dealing with next page"
+      else
+        if [[ ${object_to_remove} == "serviceengine" && ${se_delete_flag} == "true" ]] ; then
+          echo "wait for 240 seconds"
+          sleep 240
+        fi
+        next="false"
       fi
     done
-  done
-  #
-  # SE removal
-  #
-  next="true"
-  page_count=1
-  while [[ ${next} == "true" ]]
-  do
-    alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/serviceengine?page=${page_count}"
-    for item in $(echo ${response_body} | jq -c -r '.results[]')
-    do
-      item_name=$(echo ${item} | jq -c -r '.name')
-      item_url=$(echo ${item} | jq -c -r '.url')
-      echo "++++ deletion of serviceengine: ${item_name}, url ${item_url}"
-      alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${item_url} | grep / | cut -d/ -f4-)"
-    done
-    if $(echo ${response_body} | jq -e '.next' > /dev/null) ; then
-      echo "Dealing with next page"
-      ((page_count++))
-    else
-      next="false"
-    fi
   done
   #
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/useractivity?page_size=-1"

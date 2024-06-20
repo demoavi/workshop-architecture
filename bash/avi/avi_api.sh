@@ -25,6 +25,7 @@ alb_api () {
     fi
     if [ $attempt -eq $retry ]; then
       echo "    FAILED HTTP ${3} API call to https://${9}/${10}, response code was: $response_code"
+      echo "$response_body"
       exit 255
     fi
     sleep $pause
