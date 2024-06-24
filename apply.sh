@@ -50,20 +50,14 @@ alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "
 user_count=$(echo $response_body | jq -c -r '.count')
 user_results=$(echo $response_body | jq -c -r '.results')
 #
-# create // tenants already exist 
-if [[ ${tenant_count} != 1 && ${create} == "true" ]] ; then
-  echo "+++ script will exist because tenants already exist, please clean-up"
-  exit
-fi
-#
-# create // users already exist 
-if [[ ${user_count} != 1 && ${create} == "true" ]] ; then
-  echo "+++ script will exist because users already exist, please clean-up"
-  exit
+# create // tenants or users already exist
+if [[ ${create} == "true" && (${tenant_count} != 1 || ${user_count} != 1) ]] ; then
+  echo "+++ script will exist because tenants or users already exist, please clean-up first"
+  exit 255
 fi
 #
 # create // tenants and users don't exist
-if [[ ${tenant_count} == 1 && ${user_count} == 1 && ${create} == "true" ]] ; then
+if [[ ${create} == "true" ]] ; then
   # create json file from txt file
   rm -f ${avi_attendees_file}
   json_attendees_list="[]"
@@ -209,11 +203,11 @@ if [[ ${create} == "false" ]] ; then
   list_object_to_remove='["alertconfig", "actiongroupconfig", "alertemailconfig", "virtualservice", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicy", "wafpolicypsmgroup", "httppolicyset", "sslprofile", "autoscalelaunchconfig", "cloudconnectoruser"]'
   for object_to_remove in $(echo $list_object_to_remove | jq -c -r .[])
   do
-    next="true"
-    page_count=1
-    while [[ ${next} == "true" ]]
+    previous_count=foo
+    new_count=bar
+    while [[ ${previous_count} != ${new_count} ]]
     do
-      alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page=${page_count}"
+      alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page=1"
       previous_count=$(echo ${response_body} | jq -c -r '.count')
       for item in $(echo ${response_body} | jq -c -r '.results[]')
       do
@@ -239,22 +233,17 @@ if [[ ${create} == "false" ]] ; then
           fi
         fi
       done
-      alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page=${page_count}"
+      alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "*" "${avi_version}" "" "${avi_controller}" "api/${object_to_remove}?page=1"
       new_count=$(echo ${response_body} | jq -c -r '.count')
-      if [[ ${previous_count} != ${new_count} ]]  ; then
-        echo "Dealing with next page"
-      else
-        if [[ ${object_to_remove} == "serviceengine" && ${se_delete_flag} == "true" ]] ; then
-          echo "wait for 240 seconds"
-          sleep 240
-        fi
-        next="false"
-      fi
     done
   done
-  #
+  # wait if se(s) have been removed
+  if [[ ${se_delete_flag} == "true" ]] ; then
+    echo "wait for 240 seconds"
+    sleep 240
+  fi
+  # track user activity in /home/ubuntu/useractivity-${date_index}-${zone}.json
   alb_api 2 1 "GET" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "api/useractivity?page_size=-1"
-  #useractivity_count=$(echo $response_body | jq -c -r '.count')
   useractivity_results=$(echo $response_body | jq -c -r '.results')
   date_index=$(date '+%Y%m%d%H%M%S')
   echo ${useractivity_results} | jq -c -r '.[]' | while read useractivity
@@ -267,7 +256,7 @@ if [[ ${create} == "false" ]] ; then
       fi
     fi
   done
-  #
+  # users deletion
   for user in $(echo ${user_results} | jq -c -r '.[]')
   do
     user_name=$(echo ${user} | jq -c -r '.username')
@@ -277,8 +266,7 @@ if [[ ${create} == "false" ]] ; then
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${user_url} | grep / | cut -d/ -f4-)"
     fi    
   done
-  #
-  count=1
+  # tenants deletion
   echo ${tenant_results} | jq -c -r '.[]' | while read tenant
   do
     tenant_name=$(echo ${tenant} | jq -c -r '.name')
@@ -286,7 +274,6 @@ if [[ ${create} == "false" ]] ; then
     if [[ ${tenant_name} != "admin" ]] ; then
       echo "++++ deletion of tenant: ${tenant_name}, url ${tenant_url}"
       alb_api 3 5 "DELETE" "${avi_cookie_file}" "${csrftoken}" "admin" "${avi_version}" "" "${avi_controller}" "$(echo ${tenant_url} | grep / | cut -d/ -f4-)"
-      ((count++))
     fi
   done
 fi
