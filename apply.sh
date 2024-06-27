@@ -200,7 +200,27 @@ fi
 #
 if [[ ${create} == "false" ]] ; then
   IFS=$'\n'
-  list_object_to_remove='["alertconfig", "actiongroupconfig", "alertemailconfig", "virtualservice", "serverautoscalepolicy", "poolgroup", "pool", "healthmonitor", "vsvip", "networksecuritypolicy", "applicationprofile", "serviceengine", "serviceenginegroup", "analyticsprofile", "wafpolicy", "wafpolicypsmgroup", "httppolicyset", "sslprofile", "autoscalelaunchconfig", "cloudconnectoruser", "ipamdnsproviderprofile"]'
+  list_object_to_remove='["alertconfig",
+                          "actiongroupconfig",
+                          "alertemailconfig",
+                          "virtualservice",
+                          "serverautoscalepolicy",
+                          "poolgroup",
+                          "pool",
+                          "healthmonitor",
+                          "vsvip",
+                          "networksecuritypolicy",
+                          "applicationprofile",
+                          "serviceengine",
+                          "serviceenginegroup",
+                          "analyticsprofile",
+                          "wafpolicy",
+                          "wafpolicypsmgroup",
+                          "httppolicyset",
+                          "sslprofile",
+                          "autoscalelaunchconfig",
+                          "cloudconnectoruser",
+                          "ipamdnsproviderprofile"]'
   for object_to_remove in $(echo $list_object_to_remove | jq -c -r .[])
   do
     previous_count=foo
