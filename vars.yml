@@ -1,4 +1,3 @@
 ---
-create: true
+create: false
 zone: europe
-test: duplicate
