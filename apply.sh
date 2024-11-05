@@ -27,7 +27,7 @@ avi_auth_file="/home/ubuntu/.avicreds-${zone}.json"
 avi_attendees_file="/home/ubuntu/attendees-${zone}.json"
 avi_attendee_txt_with_duplicates="/home/ubuntu/attendees-${zone}.txt"
 avi_attendee_txt="/home/ubuntu/attendees-${zone}-wo-duplicates.txt"
-cat ${avi_attendee_txt_with_duplicates} | sort | uniq > ${avi_attendee_txt}
+cat ${avi_attendee_txt_with_duplicates} | tr '[:upper:]' '[:lower:] | sort | uniq > ${avi_attendee_txt}
 avi_cookie_file="/home/ubuntu/avi_cookie_${zone}.txt"
 avi_attendee_password=$(jq -c -r '.default_attendee_password' /home/ubuntu/.avi_attendee_password.json)
 rm -f ${avi_cookie_file}
