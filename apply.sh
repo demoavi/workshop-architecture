@@ -202,7 +202,7 @@ fi
 #
 if [[ ${create} == "false" ]] ; then
   IFS=$'\n'
-  list_object_to_remove='["GslbService",
+  list_object_to_remove='["gslbservice",
                           "alertconfig",
                           "actiongroupconfig",
                           "alertemailconfig",
