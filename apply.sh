@@ -53,10 +53,10 @@ user_count=$(echo $response_body | jq -c -r '.count')
 user_results=$(echo $response_body | jq -c -r '.results')
 #
 # create // tenants or users already exist
-if [[ ${create} == "true" && (${tenant_count} != 1 || ${user_count} != 1) ]] ; then
-  echo "+++ script will exist because tenants or users already exist, please clean-up first"
-  exit 255
-fi
+#if [[ ${create} == "true" && (${tenant_count} != 1 || ${user_count} != 1) ]] ; then
+#  echo "+++ script will exist because tenants or users already exist, please clean-up first"
+#  exit 255
+#fi
 #
 # create // tenants and users don't exist
 if [[ ${create} == "true" ]] ; then
