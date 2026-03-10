@@ -237,7 +237,7 @@ if [[ ${create} == "false" ]] ; then
         item_name=$(echo ${item} | jq -c -r '.name')
         item_tenant_name=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
         item_url=$(echo ${item} | jq -c -r '.url')
-        if [[ ${item_name} != "Default-Group" * && ${item_name} != System-* && ${item_name} != Syslog* && ${item_tenant_name} != "admin" && ${object_to_remove} != "serviceengine" ]] ; then
+        if [[ ${item_name} != "Default-Group" && ${item_name} != System-* && ${item_name} != Syslog* && ${item_tenant_name} != "admin" && ${object_to_remove} != "serviceengine" ]] ; then
           item_tenant_uuid=$(echo ${item} | jq -c -r '.tenant_ref' | grep / | cut -d/ -f6-)
           item_tenant_name=$(echo ${tenant_results} | jq -c -r --arg arg "${item_tenant_uuid}" '.[] | select( .uuid == $arg ) | .name')
           echo "++++ deletion of ${object_to_remove}: ${item_name}, url ${item_url}"
